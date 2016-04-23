@@ -6,7 +6,9 @@ compiler:
 install:
     - sudo apt-get install libc++-dev
 
+# Don't use cmake build since travis has libc++ issues
 script:
   - mkdir build
   - cd build
-  - cmake .. && make
+  - clang++ ../main.cpp -std=c++11 -o metaFloat
+  - ./metaFloat
