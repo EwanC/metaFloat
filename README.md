@@ -12,6 +12,4 @@
 #### License: MIT
 
 Hobby project for improving my knowledge of IEEE 754 floating point and
-compile time c++
-
-clang formatted Google style
+compile time c++.
