@@ -1,14 +1,3 @@
-/*
-    metaFloat
-    Author: ewan.cr@gmail.com
-    License: MIT
-
-    Takes an IEE754 single precision float and
-    prints the decimal string representation.
-
-    clang-format google style
-
-*/
 #include <bitset>
 #include <iomanip>
 #include <iostream>
@@ -64,7 +53,7 @@ class IEEE_754 {
   const char* m_float_str;
 
  public:
-  IEEE_754() { m_float_str = calc_float_str(); }
+  constexpr IEEE_754() { m_float_str = calc_float_str(); }
   void print() {
     print_colour<console_red>("Sign ");
     print_colour<console_blue>("Exponent ");
@@ -84,10 +73,21 @@ class IEEE_754 {
 
 int main() {
   constexpr const uint32_t float_rep = FLOAT_VAL;
+
+  // Get sign bit
   const uint32_t sign = (float_rep & sign_mask) >> (32 - sign_bits);
+
+  // Get 8 exponents bits
   const uint32_t exponent = (float_rep & exponent_mask) >> mantissa_bits;
+
+  // Get 23 mantissa bits
   const uint32_t mantissa = float_rep & mantissa_mask;
 
+  // Instantiate print helper class
   IEEE_754<sign, exponent, mantissa> printer;
+
+  // Print to stdout at runtime
   printer.print();
+
+  return 0;
 }
