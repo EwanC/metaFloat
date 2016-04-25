@@ -10,6 +10,7 @@
 namespace
 { // anonymous
 
+// sign * 2^exponent * mantissa
 static const uint8_t sign_bits = 1;
 static const uint8_t exponent_bits = 8;
 static const uint8_t mantissa_bits = 23;
@@ -92,6 +93,43 @@ int main()
     // Get 23 mantissa bits
     const uint32_t mantissa = float_rep & mantissa_mask;
 
+    //
+    // PROTOTYPE IMPL
+    //
+
+    if (sign)
+        std::cout << "-";
+
+    // Exponent is a 2's complement number
+    // exponent has a bias of 127, which we must subtract
+    const int32_t adjusted_exp = static_cast<int32_t>(exponent) - 127;
+
+    // Hidden 24th bit is 1 in mantissa
+    const uint32_t full_mantissa = mantissa | (1 << mantissa_bits);
+
+    const uint32_t adjustment = mantissa_bits - adjusted_exp;
+
+    uint32_t integer_component = full_mantissa >> adjustment;
+    std::cout << integer_component << ".";
+
+    // Top of the fraction
+    uint32_t frac = full_mantissa & ((1 << adjustment) - 1);
+
+    // Base of the fraction, must be bigger than frac
+    uint32_t base = 1 << adjustment;
+
+    int decimal_places = 0;
+    const int max_digits_to_print = 6;
+    const int base_10 = 10;
+    while (frac != 0 && decimal_places++ < max_digits_to_print)
+    {
+        frac *= base_10;
+        std::cout << (frac / base);
+        frac %= base;
+    }
+    std::cout << std::endl;
+
+    // Get 23 mantissa bits
     // Instantiate print helper class
     IEEE_754<sign, exponent, mantissa> printer;
 
