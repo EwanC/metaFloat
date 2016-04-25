@@ -10,6 +10,11 @@
 namespace
 { // anonymous
 
+// RANCID GLOBAL VARIABLES
+char buffer[1024] = {0};
+unsigned int buffer_index = 0;
+// END KILL THESE
+
 // sign * 2^exponent * mantissa
 static const uint8_t sign_bits = 1;
 static const uint8_t exponent_bits = 8;
@@ -50,10 +55,53 @@ template <uint32_t sign, uint32_t exponent, uint32_t mantissa> class IEEE_754
         std::cout << "\033[" << console_default << "m";
     }
 
-    // TODO: Implement this
+    void print_int_as_string(uint32_t x) const
+    {
+        while (x != 0)
+        {
+            int rem = x % 10;
+            buffer[buffer_index++] = (rem > 9) ? (rem - 10) + 'a' : rem + '0';
+            x = x / 10;
+        }
+    }
+
     constexpr const char* calc_float_str() const
     {
-        return "-1.234";
+        if (sign)
+            buffer[buffer_index++] = '-';
+
+        // Exponent is a 2's complement number
+        // exponent has a bias of 127, which we must subtract
+        const int32_t adjusted_exp = static_cast<int32_t>(exponent) - 127;
+
+        //// Hidden 24th bit is 1 in mantissa
+        const uint32_t full_mantissa = mantissa | (1 << mantissa_bits);
+
+        const uint32_t adjustment = mantissa_bits - adjusted_exp;
+
+        uint32_t integer_component = full_mantissa >> adjustment;
+
+        print_int_as_string(integer_component);
+        buffer[buffer_index++] = '.';
+
+        //// Top of the fraction
+        uint32_t frac = full_mantissa & ((1 << adjustment) - 1);
+
+        //// Base of the fraction, must be bigger than frac
+        uint32_t base = 1 << adjustment;
+
+        int decimal_places = 0;
+        const int max_digits_to_print = 12;
+        const int base_10 = 10;
+        while (frac != 0 && decimal_places++ < max_digits_to_print)
+        {
+            frac *= base_10;
+            print_int_as_string(frac / base);
+            frac %= base;
+        }
+
+        buffer[buffer_index++] = '\0';
+        return buffer;
     }
 
     const char* m_float_str;
@@ -92,42 +140,6 @@ int main()
 
     // Get 23 mantissa bits
     const uint32_t mantissa = float_rep & mantissa_mask;
-
-    //
-    // PROTOTYPE IMPL
-    //
-
-    if (sign)
-        std::cout << "-";
-
-    // Exponent is a 2's complement number
-    // exponent has a bias of 127, which we must subtract
-    const int32_t adjusted_exp = static_cast<int32_t>(exponent) - 127;
-
-    // Hidden 24th bit is 1 in mantissa
-    const uint32_t full_mantissa = mantissa | (1 << mantissa_bits);
-
-    const uint32_t adjustment = mantissa_bits - adjusted_exp;
-
-    uint32_t integer_component = full_mantissa >> adjustment;
-    std::cout << integer_component << ".";
-
-    // Top of the fraction
-    uint32_t frac = full_mantissa & ((1 << adjustment) - 1);
-
-    // Base of the fraction, must be bigger than frac
-    uint32_t base = 1 << adjustment;
-
-    int decimal_places = 0;
-    const int max_digits_to_print = 6;
-    const int base_10 = 10;
-    while (frac != 0 && decimal_places++ < max_digits_to_print)
-    {
-        frac *= base_10;
-        std::cout << (frac / base);
-        frac %= base;
-    }
-    std::cout << std::endl;
 
     // Get 23 mantissa bits
     // Instantiate print helper class
