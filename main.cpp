@@ -10,11 +10,6 @@
 namespace
 { // anonymous
 
-// RANCID GLOBAL VARIABLES
-char buffer[1024] = {0};
-unsigned int buffer_index = 0;
-// END KILL THESE
-
 // sign * 2^exponent * mantissa
 static const uint8_t sign_bits = 1;
 static const uint8_t exponent_bits = 8;
@@ -65,7 +60,11 @@ template <uint32_t sign, uint32_t exponent, uint32_t mantissa> class IEEE_754
         }
     }
 
-    constexpr const char* calc_float_str() const
+    static char buffer[1024];
+    static unsigned int buffer_index;
+
+  public:
+    constexpr IEEE_754()
     {
         if (sign)
             buffer[buffer_index++] = '-';
@@ -82,7 +81,7 @@ template <uint32_t sign, uint32_t exponent, uint32_t mantissa> class IEEE_754
         uint32_t integer_component = full_mantissa >> adjustment;
 
         print_int_as_string(integer_component);
-        buffer[buffer_index++] = '.';
+        IEEE_754<sign, exponent, mantissa>::buffer[IEEE_754<sign, exponent, mantissa>::buffer_index++] = '.';
 
         //// Top of the fraction
         uint32_t frac = full_mantissa & ((1 << adjustment) - 1);
@@ -101,15 +100,6 @@ template <uint32_t sign, uint32_t exponent, uint32_t mantissa> class IEEE_754
         }
 
         buffer[buffer_index++] = '\0';
-        return buffer;
-    }
-
-    const char* m_float_str;
-
-  public:
-    constexpr IEEE_754()
-    {
-        m_float_str = calc_float_str();
     }
 
     void print()
@@ -124,9 +114,15 @@ template <uint32_t sign, uint32_t exponent, uint32_t mantissa> class IEEE_754
         print_colour<console_green, mantissa_bits>(std::bitset<mantissa_bits>(mantissa));
         std::cout << std::endl;
 
-        std::cout << m_float_str << std::endl;
+        std::cout << buffer << std::endl;
     }
 };
+
+template <uint32_t sign, uint32_t exponent, uint32_t mantissa>
+unsigned int IEEE_754<sign, exponent, mantissa>::buffer_index = 0;
+
+template <uint32_t sign, uint32_t exponent, uint32_t mantissa>
+char IEEE_754<sign, exponent, mantissa>::buffer[1024] = {0};
 
 int main()
 {
