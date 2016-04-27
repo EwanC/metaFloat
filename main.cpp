@@ -3,8 +3,12 @@
 #include <iostream>
 
 #ifndef FLOAT_VAL
-// -1.234
-#define FLOAT_VAL 0xbf9df3b6
+#define FLOAT_VAL 0xc32d3be7 // -173.234
+//#define FLOAT_VAL 0x00000000 // +0
+//#define FLOAT_VAL 0x80000000 // -0
+//#define FLOAT_VAL 0x7f800000 // +inf
+//#define FLOAT_VAL 0xff800000 // -inf
+//#define FLOAT_VAL 0xffc20200 // NaN
 #endif
 
 namespace
@@ -67,43 +71,7 @@ template <uint32_t sign, uint32_t exponent, uint32_t mantissa> class IEEE_754
     static unsigned int s_buffer_index;
 
   public:
-    constexpr IEEE_754()
-    {
-        if (sign)
-            s_printable_buffer[s_buffer_index++] = '-';
-
-        // Exponent is a 2's complement number
-        // exponent has a bias of 127, which we must subtract
-        const int32_t adjusted_exp = static_cast<int32_t>(exponent) - 127;
-
-        //// Hidden 24th bit is 1 in mantissa
-        const uint32_t full_mantissa = mantissa | (1 << mantissa_bits);
-
-        const uint32_t adjustment = mantissa_bits - adjusted_exp;
-
-        uint32_t integer_component = full_mantissa >> adjustment;
-
-        print_int_as_string(integer_component);
-        s_printable_buffer[s_buffer_index++] = '.';
-
-        //// Top of the fraction
-        uint32_t frac = full_mantissa & ((1 << adjustment) - 1);
-
-        //// Base of the fraction, must be bigger than frac
-        uint32_t base = 1 << adjustment;
-
-        int decimal_places = 0;
-        const int max_digits_to_print = 12;
-        const int base_10 = 10;
-        while (frac != 0 && decimal_places++ < max_digits_to_print)
-        {
-            frac *= base_10;
-            print_int_as_string(frac / base);
-            frac %= base;
-        }
-
-        s_printable_buffer[s_buffer_index++] = '\0';
-    }
+    constexpr IEEE_754();
 
     void print()
     {
@@ -128,6 +96,87 @@ unsigned int IEEE_754<sign, exponent, mantissa>::s_buffer_index = 0;
 
 template <uint32_t sign, uint32_t exponent, uint32_t mantissa>
 char IEEE_754<sign, exponent, mantissa>::s_printable_buffer[buffer_size] = {0};
+
+template <uint32_t sign, uint32_t exponent, uint32_t mantissa>
+constexpr
+IEEE_754<sign, exponent, mantissa>::IEEE_754()
+{
+    if (sign)
+        s_printable_buffer[s_buffer_index++] = '-';
+
+    // Exponent is a 2's complement number
+    // exponent has a bias of 127, which we must subtract
+    const int32_t adjusted_exp = static_cast<int32_t>(exponent) - 127;
+
+    //// Hidden 24th bit is 1 in mantissa
+    const uint32_t full_mantissa = mantissa | (1 << mantissa_bits);
+
+    const uint32_t adjustment = mantissa_bits - adjusted_exp;
+
+    uint32_t integer_component = full_mantissa >> adjustment;
+
+    print_int_as_string(integer_component);
+    s_printable_buffer[s_buffer_index++] = '.';
+
+    //// Top of the fraction
+    uint32_t frac = full_mantissa & ((1 << adjustment) - 1);
+
+    //// Base of the fraction, must be bigger than frac
+    uint32_t base = 1 << adjustment;
+
+    int decimal_places = 0;
+    const int max_digits_to_print = 12;
+    const int base_10 = 10;
+    while (frac != 0 && decimal_places++ < max_digits_to_print)
+    {
+        frac *= base_10;
+        print_int_as_string(frac / base);
+        frac %= base;
+    }
+
+    s_printable_buffer[s_buffer_index++] = '\0';
+}
+
+template <>
+constexpr
+IEEE_754<0u, 0u, 0u>::IEEE_754()
+{
+    //s_printable_buffer[0] = '+';
+    //s_printable_buffer[1] = '0';
+}
+
+template <>
+constexpr
+IEEE_754<1u, 0u, 0u>::IEEE_754()
+{
+    //s_printable_buffer[0] = '-';
+    //s_printable_buffer[1] = '0';
+}
+
+template <>
+constexpr
+IEEE_754<0u, 255u, 0u>::IEEE_754()
+{
+    //s_printable_buffer[0] = '+';
+    //s_printable_buffer[1] = 'inf';
+}
+
+template <>
+constexpr
+IEEE_754<1u, 255u, 0u>::IEEE_754()
+{
+    //s_printable_buffer[0] = '-';
+    //s_printable_buffer[1] = 'inf';
+}
+
+//template <uint32_t sign, uint32_t exponent, uint32_t mantissa>
+//constexpr
+//IEEE_754<sign, 255u, mantissa>::IEEE_754()
+//{
+//    //s_printable_buffer[0] = 'N';
+//    //s_printable_buffer[1] = 'a';
+//    //s_printable_buffer[2] = 'N';
+//}
 
 int main()
 {
