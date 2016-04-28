@@ -6,7 +6,7 @@
 // with CXX_FLAGS=-DFLOAT_VALUE=0x.....
 // Otherwise a predefined value will be used.
 #ifndef FLOAT_VAL
-#define FLOAT_VAL 0xc32d3be7   // -173.234
+#define FLOAT_VAL 0xc32d3be7 // -173.234
 //#define FLOAT_VAL 0x00000000 // +0
 //#define FLOAT_VAL 0x80000000 // -0
 //#define FLOAT_VAL 0x7f800000 // +inf
@@ -44,7 +44,8 @@ enum colour_codes_e
 };
 
 // Prints c string to stdout with templated ANSI colour
-template <colour_codes_e colour> void print_colour(const char* c_str)
+template <colour_codes_e colour>
+void print_colour(const char* c_str)
 {
     std::cout << "\033[" << colour << "m";
     std::cout << c_str;
@@ -52,7 +53,8 @@ template <colour_codes_e colour> void print_colour(const char* c_str)
 }
 
 // Prints individual bits to stdout with templated ANSI colour
-template <colour_codes_e colour, size_t bitset_size> void print_colour(std::bitset<bitset_size> bitset)
+template <colour_codes_e colour, size_t bitset_size>
+void print_colour(std::bitset<bitset_size> bitset)
 {
     std::cout << "\033[" << colour << "m";
     std::cout << bitset;
@@ -62,7 +64,8 @@ template <colour_codes_e colour, size_t bitset_size> void print_colour(std::bits
 static const uint16_t buffer_size = 256;
 } // end anonymous namespace
 
-template <uint32_t sign, uint32_t exponent, uint32_t mantissa> class IEEE_754
+template <uint32_t sign, uint32_t exponent, uint32_t mantissa>
+class IEEE_754
 {
   private:
     void print_int_as_string(uint32_t x) const
@@ -141,7 +144,8 @@ unsigned int IEEE_754<sign, exponent, mantissa>::s_buffer_index = 0;
 template <uint32_t sign, uint32_t exponent, uint32_t mantissa>
 char IEEE_754<sign, exponent, mantissa>::s_printable_buffer[buffer_size] = {0};
 
-template <uint32_t sign> struct IEEE_754<sign, 0u, 0u>
+template <uint32_t sign>
+struct IEEE_754<sign, 0u, 0u>
 {
     void print()
     {
@@ -163,7 +167,8 @@ template <uint32_t sign> struct IEEE_754<sign, 0u, 0u>
     }
 };
 
-template <uint32_t sign> struct IEEE_754<sign, 255u, 0u>
+template <uint32_t sign>
+struct IEEE_754<sign, 255u, 0u>
 {
     void print()
     {
@@ -185,7 +190,8 @@ template <uint32_t sign> struct IEEE_754<sign, 255u, 0u>
     }
 };
 
-template <uint32_t sign, uint32_t mantissa> struct IEEE_754<sign, 255u, mantissa>
+template <uint32_t sign, uint32_t mantissa>
+struct IEEE_754<sign, 255u, mantissa>
 {
     void print()
     {
