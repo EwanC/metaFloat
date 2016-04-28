@@ -29,34 +29,34 @@ static const uint32_t mantissa_mask = 0x007FFFFF;
 
 static const uint16_t buffer_size = 256;
 
+enum colour_codes_e
+{
+    console_red = 31,
+    console_green = 32,
+    console_blue = 34,
+    console_purple = 35,
+    console_default = 39
+};
+
+template <colour_codes_e colour> void print_colour(const char* c_str)
+{
+    std::cout << "\033[" << colour << "m";
+    std::cout << c_str;
+    std::cout << "\033[" << console_default << "m";
+}
+
+template <colour_codes_e colour, size_t bitset_size> void print_colour(std::bitset<bitset_size> bitset)
+{
+    std::cout << "\033[" << colour << "m";
+    std::cout << bitset;
+    std::cout << "\033[" << console_default << "m";
+}
+
 } // end anonymous namespace
 
 template <uint32_t sign, uint32_t exponent, uint32_t mantissa> class IEEE_754
 {
   private:
-    enum colour_codes_e
-    {
-        console_red = 31,
-        console_green = 32,
-        console_blue = 34,
-        console_purple = 35,
-        console_default = 39
-    };
-
-    template <colour_codes_e colour> void print_colour(const char* c_str)
-    {
-        std::cout << "\033[" << colour << "m";
-        std::cout << c_str;
-        std::cout << "\033[" << console_default << "m";
-    }
-
-    template <colour_codes_e colour, size_t bitset_size> void print_colour(std::bitset<bitset_size> bitset)
-    {
-        std::cout << "\033[" << colour << "m";
-        std::cout << bitset;
-        std::cout << "\033[" << console_default << "m";
-    }
-
     void print_int_as_string(uint32_t x) const
     {
         while (x != 0)
@@ -132,33 +132,8 @@ unsigned int IEEE_754<sign, exponent, mantissa>::s_buffer_index = 0;
 template <uint32_t sign, uint32_t exponent, uint32_t mantissa>
 char IEEE_754<sign, exponent, mantissa>::s_printable_buffer[buffer_size] = {0};
 
-template <uint32_t sign> class IEEE_754<sign, 0u, 0>
+template <uint32_t sign> struct IEEE_754<sign, 0u, 0>
 {
-  private:
-    enum colour_codes_e
-    {
-        console_red = 31,
-        console_green = 32,
-        console_blue = 34,
-        console_purple = 35,
-        console_default = 39
-    };
-
-    template <colour_codes_e colour> void print_colour(const char* c_str)
-    {
-        std::cout << "\033[" << colour << "m";
-        std::cout << c_str;
-        std::cout << "\033[" << console_default << "m";
-    }
-
-    template <colour_codes_e colour, size_t bitset_size> void print_colour(std::bitset<bitset_size> bitset)
-    {
-        std::cout << "\033[" << colour << "m";
-        std::cout << bitset;
-        std::cout << "\033[" << console_default << "m";
-    }
-
-  public:
     void print()
     {
         print_colour<console_red>("Sign ");
@@ -179,33 +154,8 @@ template <uint32_t sign> class IEEE_754<sign, 0u, 0>
     }
 };
 
-template <uint32_t sign> class IEEE_754<sign, 255u, 0u>
+template <uint32_t sign> struct IEEE_754<sign, 255u, 0u>
 {
-  private:
-    enum colour_codes_e
-    {
-        console_red = 31,
-        console_green = 32,
-        console_blue = 34,
-        console_purple = 35,
-        console_default = 39
-    };
-
-    template <colour_codes_e colour> void print_colour(const char* c_str)
-    {
-        std::cout << "\033[" << colour << "m";
-        std::cout << c_str;
-        std::cout << "\033[" << console_default << "m";
-    }
-
-    template <colour_codes_e colour, size_t bitset_size> void print_colour(std::bitset<bitset_size> bitset)
-    {
-        std::cout << "\033[" << colour << "m";
-        std::cout << bitset;
-        std::cout << "\033[" << console_default << "m";
-    }
-
-  public:
     void print()
     {
         print_colour<console_red>("Sign ");
@@ -226,33 +176,8 @@ template <uint32_t sign> class IEEE_754<sign, 255u, 0u>
     }
 };
 
-template <uint32_t sign, uint32_t mantissa> class IEEE_754<sign, 255u, mantissa>
+template <uint32_t sign, uint32_t mantissa> struct IEEE_754<sign, 255u, mantissa>
 {
-  private:
-    enum colour_codes_e
-    {
-        console_red = 31,
-        console_green = 32,
-        console_blue = 34,
-        console_purple = 35,
-        console_default = 39
-    };
-
-    template <colour_codes_e colour> void print_colour(const char* c_str)
-    {
-        std::cout << "\033[" << colour << "m";
-        std::cout << c_str;
-        std::cout << "\033[" << console_default << "m";
-    }
-
-    template <colour_codes_e colour, size_t bitset_size> void print_colour(std::bitset<bitset_size> bitset)
-    {
-        std::cout << "\033[" << colour << "m";
-        std::cout << bitset;
-        std::cout << "\033[" << console_default << "m";
-    }
-
-  public:
     void print()
     {
         print_colour<console_red>("Sign ");
