@@ -61,6 +61,21 @@ void print_colour(std::bitset<bitset_size> bitset)
     std::cout << "\033[" << console_default << "m";
 }
 
+// Pretty prints bits in IEEE 754
+template <uint32_t sign, uint32_t exponent, uint32_t mantissa>
+void print_bit_layout()
+{
+    print_colour<console_red>("Sign ");
+    print_colour<console_blue>("Exponent ");
+    print_colour<console_green>("Mantissa ");
+    std::cout << std::endl;
+
+    print_colour<console_red, sign_bits>(std::bitset<sign_bits>(sign));
+    print_colour<console_blue, exponent_bits>(std::bitset<exponent_bits>(exponent));
+    print_colour<console_green, mantissa_bits>(std::bitset<mantissa_bits>(mantissa));
+    std::cout << std::endl;
+}
+
 static const uint16_t buffer_size = 256;
 } // end anonymous namespace
 
@@ -120,18 +135,10 @@ class IEEE_754
 
         s_printable_buffer[s_buffer_index++] = '\0';
     }
+
     void print()
     {
-        print_colour<console_red>("Sign ");
-        print_colour<console_blue>("Exponent ");
-        print_colour<console_green>("Mantissa ");
-        std::cout << std::endl;
-
-        print_colour<console_red, sign_bits>(std::bitset<sign_bits>(sign));
-        print_colour<console_blue, exponent_bits>(std::bitset<exponent_bits>(exponent));
-        print_colour<console_green, mantissa_bits>(std::bitset<mantissa_bits>(mantissa));
-        std::cout << std::endl;
-
+        print_bit_layout<sign, exponent, mantissa>();
         print_colour<console_purple>("Float: ");
         print_colour<console_purple>(s_printable_buffer);
         std::cout << std::endl;
@@ -149,16 +156,7 @@ struct IEEE_754<sign, 0u, 0u>
 {
     void print()
     {
-        print_colour<console_red>("Sign ");
-        print_colour<console_blue>("Exponent ");
-        print_colour<console_green>("Mantissa ");
-        std::cout << std::endl;
-
-        print_colour<console_red, sign_bits>(std::bitset<sign_bits>(sign));
-        print_colour<console_blue, exponent_bits>(std::bitset<exponent_bits>(0));
-        print_colour<console_green, mantissa_bits>(std::bitset<mantissa_bits>(0));
-        std::cout << std::endl;
-
+        print_bit_layout<sign, 0u, 0u>();
         if (sign)
             print_colour<console_purple>("Float: -0");
         else
@@ -172,16 +170,7 @@ struct IEEE_754<sign, 255u, 0u>
 {
     void print()
     {
-        print_colour<console_red>("Sign ");
-        print_colour<console_blue>("Exponent ");
-        print_colour<console_green>("Mantissa ");
-        std::cout << std::endl;
-
-        print_colour<console_red, sign_bits>(std::bitset<sign_bits>(sign));
-        print_colour<console_blue, exponent_bits>(std::bitset<exponent_bits>(255u));
-        print_colour<console_green, mantissa_bits>(std::bitset<mantissa_bits>(0u));
-        std::cout << std::endl;
-
+        print_bit_layout<sign, 255u, 0u>();
         if (sign)
             print_colour<console_purple>("Float: -INF");
         else
@@ -195,16 +184,7 @@ struct IEEE_754<sign, 255u, mantissa>
 {
     void print()
     {
-        print_colour<console_red>("Sign ");
-        print_colour<console_blue>("Exponent ");
-        print_colour<console_green>("Mantissa ");
-        std::cout << std::endl;
-
-        print_colour<console_red, sign_bits>(std::bitset<sign_bits>(sign));
-        print_colour<console_blue, exponent_bits>(std::bitset<exponent_bits>(255u));
-        print_colour<console_green, mantissa_bits>(std::bitset<mantissa_bits>(mantissa));
-        std::cout << std::endl;
-
+        print_bit_layout<sign, 255u, mantissa>();
         print_colour<console_purple>("Float: NaN");
         std::cout << std::endl;
     }
