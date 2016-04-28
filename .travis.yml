@@ -10,5 +10,5 @@ install:
 script:
   - mkdir build
   - cd build
-  - clang++ ../main.cpp -std=c++11 -o metaFloat
+  - clang++-3.8 ../main.cpp -std=c++11 -o metaFloat
   - ./metaFloat
