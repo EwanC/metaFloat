@@ -12,7 +12,8 @@
 #### License: MIT
 
 Hobby project for improving my knowledge of IEEE 754 floating point and
-compile time c++.
+compile time c++. Takes a single precision float encoding and prints the decimal
+representation to stdout at runtime, but all the work is done compile time.
 
 
 [![Build Status](https://travis-ci.org/EwanC/metaFloat.svg)](https://travis-ci.org/EwanC/metaFloat) Master

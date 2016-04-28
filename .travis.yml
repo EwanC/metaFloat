@@ -5,6 +5,7 @@ compiler:
 
 install:
     - sudo apt-get install libc++-dev
+    - sudo apt-get install clang-3.8
 
 # Don't use cmake build since travis has libc++ issues
 script:
