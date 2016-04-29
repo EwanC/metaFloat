@@ -43,7 +43,7 @@ enum colour_codes_e
     console_default = 39
 };
 
-// Prints string to stdout with templated ANSI colour
+// Prints object of type T to stdout with templated ANSI colour
 template <colour_codes_e colour, typename T>
 void print_colour(T str)
 {
@@ -52,7 +52,7 @@ void print_colour(T str)
     std::cout << "\033[" << console_default << "m";
 }
 
-// Pretty prints bits in IEEE 754
+// Pretty prints IEEE 754 bits
 template <uint32_t sign, uint32_t exponent, uint32_t mantissa>
 void print_bit_layout()
 {
@@ -135,8 +135,9 @@ class IEEE_754
 };
 
 template <uint32_t sign, uint32_t exponent, uint32_t mantissa>
-std::string IEEE_754<sign, exponent, mantissa>::s_printable_str(256, '\0');
+std::string IEEE_754<sign, exponent, mantissa>::s_printable_str;
 
+// Partial specialization for -/+ 0
 template <uint32_t sign>
 struct IEEE_754<sign, 0u, 0u>
 {
@@ -151,6 +152,7 @@ struct IEEE_754<sign, 0u, 0u>
     }
 };
 
+// Partial specialization for -/+ infinity
 template <uint32_t sign>
 struct IEEE_754<sign, 255u, 0u>
 {
@@ -165,6 +167,7 @@ struct IEEE_754<sign, 255u, 0u>
     }
 };
 
+// Partial specialization for NaN values
 template <uint32_t sign, uint32_t mantissa>
 struct IEEE_754<sign, 255u, mantissa>
 {
