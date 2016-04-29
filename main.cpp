@@ -125,7 +125,7 @@ class IEEE_754
         s_printable_str.push_back('\0');
     }
 
-    void print()
+    void print() const
     {
         print_bit_layout<sign, exponent, mantissa>();
         print_colour<console_purple>("Float: ");
@@ -141,7 +141,7 @@ std::string IEEE_754<sign, exponent, mantissa>::s_printable_str;
 template <uint32_t sign>
 struct IEEE_754<sign, 0u, 0u>
 {
-    void print()
+    void print() const
     {
         print_bit_layout<sign, 0u, 0u>();
         if (sign)
@@ -156,7 +156,7 @@ struct IEEE_754<sign, 0u, 0u>
 template <uint32_t sign>
 struct IEEE_754<sign, 255u, 0u>
 {
-    void print()
+    void print() const
     {
         print_bit_layout<sign, 255u, 0u>();
         if (sign)
@@ -171,7 +171,7 @@ struct IEEE_754<sign, 255u, 0u>
 template <uint32_t sign, uint32_t mantissa>
 struct IEEE_754<sign, 255u, mantissa>
 {
-    void print()
+    void print() const
     {
         print_bit_layout<sign, 255u, mantissa>();
         print_colour<console_purple>("Float: NaN");
