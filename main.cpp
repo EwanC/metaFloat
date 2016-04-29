@@ -83,7 +83,7 @@ class IEEE_754
         }
     }
 
-    static std::basic_string<char> s_printable_str;
+    static std::string s_printable_str;
 
   public:
     // sign * 2^exponent * mantissa
@@ -135,7 +135,7 @@ class IEEE_754
 };
 
 template <uint32_t sign, uint32_t exponent, uint32_t mantissa>
-std::basic_string<char> IEEE_754<sign, exponent, mantissa>::s_printable_str(256, '\0');
+std::string IEEE_754<sign, exponent, mantissa>::s_printable_str(256, '\0');
 
 template <uint32_t sign>
 struct IEEE_754<sign, 0u, 0u>
