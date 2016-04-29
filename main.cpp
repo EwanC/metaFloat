@@ -43,21 +43,12 @@ enum colour_codes_e
     console_default = 39
 };
 
-// Prints c string to stdout with templated ANSI colour
-template <colour_codes_e colour>
-void print_colour(const char* c_str)
+// Prints string to stdout with templated ANSI colour
+template <colour_codes_e colour, typename T>
+void print_colour(T str)
 {
     std::cout << "\033[" << colour << "m";
-    std::cout << c_str;
-    std::cout << "\033[" << console_default << "m";
-}
-
-// Prints individual bits to stdout with templated ANSI colour
-template <colour_codes_e colour, size_t bitset_size>
-void print_colour(std::bitset<bitset_size> bitset)
-{
-    std::cout << "\033[" << colour << "m";
-    std::cout << bitset;
+    std::cout << str;
     std::cout << "\033[" << console_default << "m";
 }
 
@@ -70,13 +61,12 @@ void print_bit_layout()
     print_colour<console_green>("Mantissa ");
     std::cout << std::endl;
 
-    print_colour<console_red, g_sign_bits>(std::bitset<g_sign_bits>(sign));
-    print_colour<console_blue, g_exponent_bits>(std::bitset<g_exponent_bits>(exponent));
-    print_colour<console_green, g_mantissa_bits>(std::bitset<g_mantissa_bits>(mantissa));
+    print_colour<console_red>(std::bitset<g_sign_bits>(sign));
+    print_colour<console_blue>(std::bitset<g_exponent_bits>(exponent));
+    print_colour<console_green>(std::bitset<g_mantissa_bits>(mantissa));
     std::cout << std::endl;
 }
 
-static const uint16_t buffer_size = 256;
 } // end anonymous namespace
 
 template <uint32_t sign, uint32_t exponent, uint32_t mantissa>
@@ -88,20 +78,19 @@ class IEEE_754
         while (x != 0)
         {
             int rem = x % 10;
-            s_printable_buffer[s_buffer_index++] = (rem > 9) ? (rem - 10) + 'a' : rem + '0';
+            s_printable_str.push_back((rem > 9) ? (rem - 10) + 'a' : rem + '0');
             x = x / 10;
         }
     }
 
-    static char s_printable_buffer[buffer_size];
-    static unsigned int s_buffer_index;
+    static std::basic_string<char> s_printable_str;
 
   public:
     // sign * 2^exponent * mantissa
     constexpr IEEE_754()
     {
         if (sign)
-            s_printable_buffer[s_buffer_index++] = '-';
+            s_printable_str.push_back('-');
 
         // Exponent is a 2's complement number
         // exponent has a bias of 127, which we must subtract
@@ -115,7 +104,7 @@ class IEEE_754
         uint32_t integer_component = full_mantissa >> adjustment;
 
         print_int_as_string(integer_component);
-        s_printable_buffer[s_buffer_index++] = '.';
+        s_printable_str.push_back('.');
 
         // Top of the fraction
         uint32_t frac = full_mantissa & ((1 << adjustment) - 1);
@@ -133,23 +122,20 @@ class IEEE_754
             frac %= base;
         }
 
-        s_printable_buffer[s_buffer_index++] = '\0';
+        s_printable_str.push_back('\0');
     }
 
     void print()
     {
         print_bit_layout<sign, exponent, mantissa>();
         print_colour<console_purple>("Float: ");
-        print_colour<console_purple>(s_printable_buffer);
+        print_colour<console_purple>(s_printable_str);
         std::cout << std::endl;
     }
 };
 
 template <uint32_t sign, uint32_t exponent, uint32_t mantissa>
-unsigned int IEEE_754<sign, exponent, mantissa>::s_buffer_index = 0;
-
-template <uint32_t sign, uint32_t exponent, uint32_t mantissa>
-char IEEE_754<sign, exponent, mantissa>::s_printable_buffer[buffer_size] = {0};
+std::basic_string<char> IEEE_754<sign, exponent, mantissa>::s_printable_str(256, '\0');
 
 template <uint32_t sign>
 struct IEEE_754<sign, 0u, 0u>
