@@ -25,13 +25,13 @@ namespace
 // 7F       80       00       00       Exponent MASK
 // 00       7F       FF       FF       Mantissa MASK
 // -------------------------------------------------
-static const uint8_t sign_bits = 1;
-static const uint8_t exponent_bits = 8;
-static const uint8_t mantissa_bits = 23;
+static const uint8_t g_sign_bits = 1;
+static const uint8_t g_exponent_bits = 8;
+static const uint8_t g_mantissa_bits = 23;
 
-static const uint32_t sign_mask = 0x80000000;
-static const uint32_t exponent_mask = 0x7F800000;
-static const uint32_t mantissa_mask = 0x007FFFFF;
+static const uint32_t g_sign_mask = 0x80000000;
+static const uint32_t g_exponent_mask = 0x7F800000;
+static const uint32_t g_mantissa_mask = 0x007FFFFF;
 
 // ANSI colour codes for UNIX consoles
 enum colour_codes_e
@@ -70,9 +70,9 @@ void print_bit_layout()
     print_colour<console_green>("Mantissa ");
     std::cout << std::endl;
 
-    print_colour<console_red, sign_bits>(std::bitset<sign_bits>(sign));
-    print_colour<console_blue, exponent_bits>(std::bitset<exponent_bits>(exponent));
-    print_colour<console_green, mantissa_bits>(std::bitset<mantissa_bits>(mantissa));
+    print_colour<console_red, g_sign_bits>(std::bitset<g_sign_bits>(sign));
+    print_colour<console_blue, g_exponent_bits>(std::bitset<g_exponent_bits>(exponent));
+    print_colour<console_green, g_mantissa_bits>(std::bitset<g_mantissa_bits>(mantissa));
     std::cout << std::endl;
 }
 
@@ -108,9 +108,9 @@ class IEEE_754
         const int32_t adjusted_exp = static_cast<int32_t>(exponent) - 127;
 
         // Hidden 24th bit is 1 in mantissa
-        const uint32_t full_mantissa = mantissa | (1 << mantissa_bits);
+        const uint32_t full_mantissa = mantissa | (1 << g_mantissa_bits);
 
-        const uint32_t adjustment = mantissa_bits - adjusted_exp;
+        const uint32_t adjustment = g_mantissa_bits - adjusted_exp;
 
         uint32_t integer_component = full_mantissa >> adjustment;
 
@@ -196,13 +196,13 @@ int main()
     constexpr const uint32_t float_bits = FLOAT_VAL;
 
     // Get sign bit
-    const uint32_t sign = (float_bits & sign_mask) >> (32 - sign_bits);
+    const uint32_t sign = (float_bits & g_sign_mask) >> (32 - g_sign_bits);
 
     // Get 8 exponents bits
-    const uint32_t exponent = (float_bits & exponent_mask) >> mantissa_bits;
+    const uint32_t exponent = (float_bits & g_exponent_mask) >> g_mantissa_bits;
 
     // Get 23 mantissa bits
-    const uint32_t mantissa = float_bits & mantissa_mask;
+    const uint32_t mantissa = float_bits & g_mantissa_mask;
 
     // Instantiate helper class for printing the float
     IEEE_754<sign, exponent, mantissa> ieee754_printer;
