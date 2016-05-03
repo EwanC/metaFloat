@@ -70,27 +70,15 @@ void print_bit_layout()
 } // end anonymous namespace
 
 template <uint32_t sign, uint32_t exponent, uint32_t mantissa>
-class IEEE_754
+struct IEEE_754
 {
-  private:
-    void print_int_as_string(uint32_t x) const
+    static void print()
     {
-        while (x != 0)
-        {
-            int rem = x % 10;
-            s_printable_str.push_back((rem > 9) ? (rem - 10) + 'a' : rem + '0');
-            x = x / 10;
-        }
-    }
+        print_bit_layout<sign, exponent, mantissa>();
+        print_colour<console_purple>("Float: ");
 
-    static std::string s_printable_str;
-
-  public:
-    // sign * 2^exponent * mantissa
-    constexpr IEEE_754()
-    {
         if (sign)
-            s_printable_str.push_back('-');
+            print_colour<console_purple>('-');
 
         // Exponent is a 2's complement number
         // exponent has a bias of 127, which we must subtract
@@ -103,8 +91,8 @@ class IEEE_754
 
         uint32_t integer_component = full_mantissa >> adjustment;
 
-        print_int_as_string(integer_component);
-        s_printable_str.push_back('.');
+        print_colour<console_purple>(integer_component);
+        print_colour<console_purple>('.');
 
         // Top of the fraction
         uint32_t frac = full_mantissa & ((1 << adjustment) - 1);
@@ -118,30 +106,19 @@ class IEEE_754
         while (frac != 0 && decimal_places++ < max_digits_to_print)
         {
             frac *= base_10;
-            print_int_as_string(frac / base);
+            print_colour<console_purple>(frac / base);
             frac %= base;
         }
 
-        s_printable_str.push_back('\0');
-    }
-
-    void print() const
-    {
-        print_bit_layout<sign, exponent, mantissa>();
-        print_colour<console_purple>("Float: ");
-        print_colour<console_purple>(s_printable_str);
         std::cout << std::endl;
     }
 };
-
-template <uint32_t sign, uint32_t exponent, uint32_t mantissa>
-std::string IEEE_754<sign, exponent, mantissa>::s_printable_str;
 
 // Partial specialization for -/+ 0
 template <uint32_t sign>
 struct IEEE_754<sign, 0u, 0u>
 {
-    void print() const
+    static void print()
     {
         print_bit_layout<sign, 0u, 0u>();
         if (sign)
@@ -156,7 +133,7 @@ struct IEEE_754<sign, 0u, 0u>
 template <uint32_t sign>
 struct IEEE_754<sign, 255u, 0u>
 {
-    void print() const
+    static void print()
     {
         print_bit_layout<sign, 255u, 0u>();
         if (sign)
@@ -171,7 +148,7 @@ struct IEEE_754<sign, 255u, 0u>
 template <uint32_t sign, uint32_t mantissa>
 struct IEEE_754<sign, 255u, mantissa>
 {
-    void print() const
+    static void print()
     {
         print_bit_layout<sign, 255u, mantissa>();
         print_colour<console_purple>("Float: NaN");
@@ -193,11 +170,8 @@ int main()
     // Get 23 mantissa bits
     const uint32_t mantissa = float_bits & g_mantissa_mask;
 
-    // Instantiate helper class for printing the float
-    IEEE_754<sign, exponent, mantissa> ieee754_printer;
-
     // Print float to stdout at runtime
-    ieee754_printer.print();
+    IEEE_754<sign, exponent, mantissa>::print();
 
     return 0;
 }
