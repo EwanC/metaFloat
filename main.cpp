@@ -80,36 +80,53 @@ struct IEEE_754
         if (sign)
             print_colour<console_purple>('-');
 
-        // Exponent is a 2's complement number
-        // exponent has a bias of 127, which we must subtract
+        // Exponent is a  2's complement number with a bias of 127
         const int32_t adjusted_exp = static_cast<int32_t>(exponent) - 127;
 
-        // Hidden 24th bit is 1 in mantissa
+        // Since the mantissa is normalized the first bit will always be 1.
+        // And is therefore hidden to save space, but we need to add
+        // it back here as the 24th.
         const uint32_t full_mantissa = mantissa | (1 << g_mantissa_bits);
 
+        // Offset used to denormalize number
         const uint32_t adjustment = g_mantissa_bits - adjusted_exp;
 
-        uint32_t integer_component = full_mantissa >> adjustment;
-
+        // Print whole number followed by decimal point
+        constexpr uint32_t integer_component = full_mantissa >> adjustment;
         print_colour<console_purple>(integer_component);
         print_colour<console_purple>('.');
+
+        // Print fractional component
+        //
+        // We consider the floating point as a fraction
+        // with a top and bottom.
+        //
+        // Each digit is printed by multiplying the top
+        // of the fraction by the base we want
+        // to print, i.e. 10. Then printing the quotient
+        // of the new fraction.
+        //
+        // Finally to prepare the fraction for printing the
+        // next digit, we use the fraction.
 
         // Top of the fraction
         uint32_t frac = full_mantissa & ((1 << adjustment) - 1);
 
-        // Base of the fraction, must be bigger than frac
+        // Bottom of the fraction
         uint32_t base = 1 << adjustment;
 
-        int decimal_places = 0;
+        // We want 12 decimal digits of precision
         const int max_digits_to_print = 12;
         const int base_10 = 10;
+
+        // Iterate over each digit we want to print
+        int decimal_places = 0;
         while (frac != 0 && decimal_places++ < max_digits_to_print)
         {
             frac *= base_10;
             print_colour<console_purple>(frac / base);
             frac %= base;
         }
-
         std::cout << std::endl;
     }
 };
